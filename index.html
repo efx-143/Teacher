@@ -3,376 +3,482 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Classroom - Teacher App</title>
-    <!-- Tailwind CSS -->
+    <title>Smart Classroom - Teacher App v3</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Lucide Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide-react@latest/dist/lucide-react.js"></script>
 
     <style>
         body {
             font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
-        .file-input-wrapper { position: relative; overflow: hidden; display: inline-block; }
-        .file-input-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; }
-        .file-input-area { border: 2px dashed #cbd5e1; padding: 2rem; text-align: center; border-radius: 0.5rem; transition: all 0.3s ease; }
-        .file-input-area:hover { border-color: #4f46e5; background-color: #f8fafc; }
-        /* Toast Notification Style */
-        #toast { visibility: hidden; transition: visibility 0s, opacity 0.5s linear; opacity: 0; z-index: 60; }
-        #toast.show { visibility: visible; opacity: 1; }
-        /* Sidebar active link style */
-        .sidebar-link.active { background-color: #eef2ff; color: #4338ca; font-weight: 600; }
+        .glassmorphism {
+            background: rgba(15, 23, 42, 0.3);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .animated-gradient {
+            background: linear-gradient(-45deg, #5b21b6, #1d4ed8, #2563eb, #4f46e5);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .card-hover-effect {
+            transition: all 0.3s ease;
+        }
+        .card-hover-effect:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 25px -5px rgba(96, 165, 250, 0.4);
+        }
+        /* Custom scrollbar for dark theme */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        
+        .dropdown-menu { display: none; position: absolute; right: 0; top: 100%; z-index: 10; }
+        .dropdown.open .dropdown-menu { display: block; }
+        .nav-link, .content-tab {
+            transition: all 0.2s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link.active, .content-tab.active {
+            color: #dbeafe;
+            border-bottom-color: #60a5fa;
+        }
+        #toast { visibility: hidden; transition: visibility 0s, opacity 0.5s linear, transform 0.5s ease-in-out; opacity: 0; transform: translateY(-20px); z-index: 60; }
+        #toast.show { visibility: visible; opacity: 1; transform: translateY(0); }
+        #notification-panel { display: none; }
     </style>
 </head>
-<body class="bg-gray-100">
+<body class="bg-slate-900 text-slate-300">
 
-    <!-- Main Container -->
     <div id="app-container">
-
         <!-- LOGIN PAGE -->
-        <div id="login-page" class="flex items-center justify-center min-h-screen">
-            <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg">
+        <div id="login-page" class="flex items-center justify-center min-h-screen animated-gradient">
+            <div class="w-full max-w-sm p-8 space-y-6 glassmorphism rounded-2xl shadow-2xl">
                 <div class="text-center">
-                    <svg class="mx-auto h-12 w-auto text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h12M3.75 3h16.5M3.75 12h16.5m-16.5 4.5h16.5M12 3v9m0 0l-3.75-3.75M12 12l3.75-3.75" /></svg>
-                    <h2 class="mt-4 text-3xl font-bold tracking-tight text-gray-900">Smart Classroom Login</h2>
-                    <p class="mt-2 text-sm text-gray-600">Apne schedule ko manage karne ke liye sign in karein</p>
+                    <h2 class="mt-4 text-3xl font-extrabold text-white">Smart Classroom</h2>
+                    <p class="mt-2 text-sm text-indigo-200">Your Digital Teaching Assistant</p>
                 </div>
                 <form class="space-y-6" onsubmit="event.preventDefault(); handleLogin();">
-                    <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700">Email address</label>
-                        <input id="email" name="email" type="email" autocomplete="email" required value="teacher@example.com" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                    </div>
-                    <div>
-                        <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-                        <input id="password" name="password" type="password" autocomplete="current-password" required value="password" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                    </div>
-                    <div>
-                        <button id="login-btn" type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                            <span id="login-btn-text">Sign in</span>
-                            <svg id="login-spinner" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                        </button>
-                    </div>
+                    <div><input id="email" type="email" autocomplete="email" required value="shilpa.t@example.com" class="mt-1 block w-full px-4 py-3 border bg-slate-900/30 text-white placeholder-indigo-200 border-white/30 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-white sm:text-sm" placeholder="Email address"></div>
+                    <div><input id="password" type="password" autocomplete="current-password" required value="password" class="mt-1 block w-full px-4 py-3 border bg-slate-900/30 text-white placeholder-indigo-200 border-white/30 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-white sm:text-sm" placeholder="Password"></div>
+                    <div><button id="login-btn" type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-md font-bold text-indigo-700 bg-white hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-indigo-700 focus:ring-white transition-transform transform hover:scale-105"><span id="login-btn-text">Sign in</span><svg id="login-spinner" class="animate-spin h-5 w-5 text-indigo-700 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></button></div>
                 </form>
+                 <p class="text-center text-xs text-indigo-200/50 pt-6">Made with ❤️ by Sanyam Chavan</p>
             </div>
         </div>
 
-        <!-- MAIN APP INTERFACE (Initially Hidden) -->
+        <!-- MAIN APP INTERFACE -->
         <div id="app-interface" class="hidden">
-            <!-- Sidebar -->
-            <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-md transform -translate-x-full transition-transform duration-300 ease-in-out md:translate-x-0">
-                <div class="p-4 flex items-center justify-between border-b">
-                    <div class="flex items-center">
-                        <svg class="h-8 w-auto text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h12M3.75 3h16.5M3.75 12h16.5m-16.5 4.5h16.5M12 3v9m0 0l-3.75-3.75M12 12l3.75-3.75" /></svg>
-                        <span class="ml-2 text-xl font-bold text-gray-800">Smart Classroom</span>
+            <header class="p-4 sm:p-6 md:px-8 border-b border-slate-700 relative">
+                <div class="flex justify-between items-center">
+                    <h1 class="text-xl font-bold text-white">Smart Classroom</h1>
+                    <div class="flex items-center gap-4">
+                        <div class="relative">
+                            <button id="notification-bell-btn" class="text-slate-400 hover:text-white"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bell"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></button>
+                            <span id="notification-dot" class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-slate-900 hidden"></span>
+                        </div>
+                        <button onclick="handleLogout()" class="text-slate-400 hover:text-red-400"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg></button>
                     </div>
-                     <button id="close-sidebar-btn" class="md:hidden text-gray-500 hover:text-gray-800">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-                    </button>
                 </div>
-                <nav class="mt-4">
-                    <a href="#" onclick="showPage('dashboard-page')" class="sidebar-link active flex items-center px-4 py-3 text-gray-700 hover:bg-gray-200">
-                        <svg xmlns="http://www.w.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layout-dashboard"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
-                        <span class="ml-3">Dashboard</span>
-                    </a>
-                    <a href="#" onclick="showPage('profile-page')" class="sidebar-link flex items-center px-4 py-3 text-gray-700 hover:bg-gray-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-circle"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3"/><path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"/></svg>
-                        <span class="ml-3">My Profile</span>
-                    </a>
-                </nav>
-                <div class="absolute bottom-0 w-full border-t p-4">
-                    <button onclick="handleLogout()" class="w-full flex items-center justify-center py-2 px-4 rounded-md text-sm font-medium text-red-600 bg-red-100 hover:bg-red-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
-                        <span class="ml-2">Logout</span>
-                    </button>
+                <div class="mt-6">
+                    <nav class="flex gap-6">
+                        <a href="#" onclick="showPage('schedule-page')" class="nav-link text-slate-400 font-semibold pb-2 active">Schedule</a>
+                        <a href="#" onclick="showPage('content-page')" class="nav-link text-slate-400 font-semibold pb-2">My Content</a>
+                    </nav>
                 </div>
-            </aside>
+                <!-- Notification Panel -->
+                <div id="notification-panel" class="absolute top-16 right-8 w-80 bg-slate-800 border border-slate-700 rounded-lg shadow-2xl z-20">
+                    <div class="p-3 border-b border-slate-700"><h4 class="font-bold text-slate-200">Notifications</h4></div>
+                    <div id="notification-list" class="p-2 max-h-80 overflow-y-auto">
+                        <!-- Notifications will be injected here -->
+                    </div>
+                </div>
+            </header>
             
-            <!-- Overlay for mobile sidebar -->
-            <div id="sidebar-overlay" class="fixed inset-0 bg-black opacity-50 z-30 hidden md:hidden"></div>
-
-            <!-- Main Content -->
-            <div class="flex-1 flex flex-col md:ml-64">
-                <header class="bg-white shadow-sm flex justify-between items-center p-4 sticky top-0 z-20">
-                     <button id="open-sidebar-btn" class="md:hidden text-gray-600 hover:text-gray-800">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
-                    </button>
-                    <div class="flex items-center ml-auto">
-                        <span class="text-sm font-medium text-gray-700 mr-4 hidden sm:block">Welcome, Dr. Anjali Sharma!</span>
-                        <img class="h-8 w-8 rounded-full object-cover" src="https://placehold.co/100x100/667eea/ffffff?text=AS" alt="User avatar">
-                    </div>
-                </header>
-                
-                <main class="flex-1 bg-gray-100">
-                    <div id="dashboard-page" class="app-page container mx-auto px-4 sm:px-6 py-8">
-                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
-                            <h1 class="text-2xl font-bold text-gray-900">Schedule</h1>
-                            <div class="mt-4 sm:mt-0">
-                                <div class="flex items-center bg-white rounded-md shadow-sm p-1">
-                                    <button id="view-today-btn" onclick="changeScheduleView('today')" class="px-3 py-1 text-sm font-semibold rounded-md bg-indigo-600 text-white">Today</button>
-                                    <button id="view-tomorrow-btn" onclick="changeScheduleView('tomorrow')" class="px-3 py-1 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-md">Tomorrow</button>
-                                </div>
-                            </div>
+            <main class="p-4 sm:p-6 md:p-8">
+                <!-- Schedule Page -->
+                <div id="schedule-page" class="app-page">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
+                        <div>
+                            <h2 id="greeting" class="text-2xl font-bold text-slate-100"></h2>
+                            <p class="text-slate-400 mt-1">Here's your plan for today. Let's make it a great one!</p>
                         </div>
-                        <div id="schedule-container" class="space-y-4">
-                            <!-- Schedule items will be dynamically inserted here -->
-                        </div>
+                        <button onclick="openExtraLectureModal()" class="mt-4 sm:mt-0 flex items-center justify-center py-2 px-4 rounded-xl text-sm font-bold text-white animated-gradient hover:opacity-90 shadow-lg shadow-blue-500/30 transition-transform transform hover:scale-105"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus-circle mr-2"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/></svg>Add Extra Lecture</button>
                     </div>
-                    <div id="profile-page" class="app-page hidden container mx-auto px-4 sm:px-6 py-8">
-                         <h1 class="text-2xl font-bold text-gray-900 mb-6">My Profile</h1>
-                         <div class="bg-white p-6 rounded-lg shadow-md max-w-2xl mx-auto">
-                             <div class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6">
-                                 <img class="h-24 w-24 rounded-full object-cover" src="https://placehold.co/100x100/667eea/ffffff?text=AS" alt="User avatar">
-                                 <div>
-                                     <h2 class="text-2xl font-bold text-gray-800">Dr. Anjali Sharma</h2>
-                                     <p class="text-md text-gray-600">Senior Professor, Department of Physics</p>
-                                 </div>
-                             </div>
-                             <div class="mt-6 border-t pt-6">
-                                 <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-6">
-                                     <div class="sm:col-span-1">
-                                         <dt class="text-sm font-medium text-gray-500">Email address</dt>
-                                         <dd class="mt-1 text-sm text-gray-900">anjali.sharma@university.edu</dd>
-                                     </div>
-                                     <div class="sm:col-span-1">
-                                         <dt class="text-sm font-medium text-gray-500">Phone number</dt>
-                                         <dd class="mt-1 text-sm text-gray-900">+91 98765 43210</dd>
-                                     </div>
-                                     <div class="sm:col-span-2">
-                                         <dt class="text-sm font-medium text-gray-500">Subjects Taught</dt>
-                                         <dd class="mt-1 text-sm text-gray-900">Quantum Physics, Classical Mechanics, Electrodynamics</dd>
-                                     </div>
-                                 </dl>
-                             </div>
-                         </div>
+                    <div id="schedule-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+                </div>
+                <!-- Content Library Page -->
+                <div id="content-page" class="app-page hidden">
+                    <h2 class="text-2xl font-bold text-slate-100 mb-6">My Content Library</h2>
+                    <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 text-center">
+                        <p class="text-slate-400">Yahan aap apni saari files upload karke manage kar sakte hain. (Feature jald hi aa raha hai!)</p>
                     </div>
-                </main>
-            </div>
+                </div>
+            </main>
         </div>
     </div>
 
-    <!-- CONTENT MANAGEMENT MODAL -->
-    <div id="content-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center hidden z-50 p-4">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-lg">
-            <div class="p-4 border-b flex justify-between items-center">
-                <h2 class="text-xl font-semibold" id="modal-title">Manage Content</h2>
-                <button onclick="closeModal()" class="text-gray-500 hover:text-gray-800">&times;</button>
-            </div>
-            <div class="p-6">
-                <div class="border-b border-gray-200"><nav class="-mb-px flex space-x-6"><button id="tab-upload" onclick="switchTab('upload')" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">Upload File</button><button id="tab-link" onclick="switchTab('link')" class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">Add Drive Link</button></nav></div>
-                <div id="content-upload" class="mt-6"><div class="file-input-wrapper w-full"><div class="file-input-area"><svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg><p class="mt-2 text-sm text-gray-600"><span class="font-medium text-indigo-600">Click to upload</span> or drag and drop</p><p class="text-xs text-gray-500">PPT, PDF, DOCX (MAX. 50MB)</p><input type="file" id="file-upload-input" onchange="updateFileName()"></div></div><p id="file-name-display" class="mt-2 text-sm text-gray-700 text-center"></p></div>
-                <div id="content-link" class="mt-6 hidden"><label for="drive-link" class="block text-sm font-medium text-gray-700">Google Drive Sharable Link</label><div class="mt-1"><input type="url" name="drive-link" id="drive-link" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="https://docs.google.com/presentation/d/..."></div></div>
-            </div>
-            <div class="p-4 bg-gray-50 text-right space-x-2"><button onclick="closeModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Cancel</button><button onclick="handleSave()" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700">Save Changes</button></div>
-        </div>
-    </div>
-
+    <!-- Modals -->
+    <div id="modal-backdrop" class="fixed inset-0 bg-black bg-opacity-70 hidden z-40"></div>
+    <div id="modal-container" class="fixed inset-0 flex items-center justify-center hidden z-50 p-4"></div>
+    
     <!-- TOAST NOTIFICATION -->
-    <div id="toast" class="fixed top-5 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg flex items-center">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-circle-2"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>
-        <p id="toast-message" class="ml-2 font-medium">Content saved successfully!</p>
+    <div id="toast" class="fixed top-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg flex items-center">
+        <div id="toast-icon" class="mr-2"></div>
+        <p id="toast-message" class="font-medium"></p>
     </div>
+
 
     <script>
-        // --- DYNAMIC DATA ---
-        let scheduleDataToday = [
-            { id: 1, time: '09:00 AM - 10:00 AM', subject: 'Quantum Physics - PH-301', classroom: 'C-104', contentAdded: true },
-            { id: 2, time: '11:00 AM - 12:00 PM', subject: 'Data Structures - CS-202', classroom: 'A-201 (Lab)', contentAdded: false },
-            { id: 3, time: '12:00 PM - 01:00 PM', subject: 'Software Engineering - CS-305', classroom: 'B-302', contentAdded: false },
-            { id: 4, time: '02:00 PM - 03:00 PM', subject: 'Advanced Mathematics - MA-401', classroom: 'D-101', contentAdded: true },
+        // --- DATA ---
+        const facultyMap = {
+            'UPM': 'Dr. Umesh Moharil', 'RPD': 'Mr. R P dharmale', 'ST': 'Ms. Shilpa Tambe', 'MRY': 'Dr. Meghna Yashwante',
+            'NG': 'Mr. Nikhil Gurav', 'UBK': 'Mrs. Uma Karanje', 'MDB': 'Ms. Manisha Bhise', 'SRK': 'Mr. Suhash Kothawale',
+            'SSC': 'Dr. Swapnil Chaudhari', 'AGP': 'Dr. Amita Pal', 'SM': 'Mrs.Sonali Murumkar', 'SDD': 'Dr. Shrikant Dhamdhere',
+            'AGD': 'Dr. Anil Darekar', 'ADP': 'Mrs. Aishwarya Pawar', 'BDP': 'Dr. B D Patil', 'PG': 'Mrs. Pankaj Gaur',
+            'PSD': 'Dr. Pratibha Desai', 'SB': 'Mr. Sanket Barde', 'PMN': 'Dr. Poonam Nakhate', 'HDV': 'Mrs. Harshal Vaidya',
+            'MS': 'Mr. Mukesh Sharma', 'TP': 'Mr. Tukaram Patil', 'RBM': 'Mr. Rahul Mali', 'CJ': 'Dr. Chhaya Joshi',
+            'VK': 'Mr. Vishal Kulkarni', 'SK': 'Ms. Shital Khande'
+        };
+        const subjectMap = {
+            'PHY': 'Physics', 'M1': 'Maths-1', 'MPW': 'Workshop', 'FPL': 'Programming', 'EM': 'Engg. Mechanics',
+            'BEE': 'Basic Electrical Engg.', 'DTI': 'Design Thinking', 'CHEM': 'Chemistry', 'EG': 'Engg. Graphics',
+            'BXE': 'Basic Electronics Engg.', 'PCS': 'Communication Skills', 'CCC1': 'CCC1 Activities'
+        };
+        const subjects = [
+            "DTI (ST)", "EG (ST)", "PHY (UPM)", "M1 (RBM)", "MPW (RPD)", "FPL (SRK)", "CCC1 (MS)", "EM (NG)", "M1 (PG)", "BEE (SB)", "DTI (VK)",
+            "CHEM (PSD)", "PHY (PMN)", "CHEM (AGD)", "EM (MDB)", "FPL (SM)", "BXE (HDV)", "EG (BDP)",
+            "EG (VK)", "BXE (SK)", "FPL (SSC)", "M1 (AGP)", "PCS (TP)", "BEE (MRY)", "PCS (CJ)", "FPL (SDD)", "FPL (UBK)"
+        ].map(s => {
+            const match = s.match(/([A-Z0-9\s-]+)\s\(([A-Z]{2,3})\)/);
+            if (match) {
+                const subCode = match[1];
+                const facCode = match[2];
+                const subName = subjectMap[subCode] || subCode;
+                const facName = facultyMap[facCode] || facCode;
+                return `${subName} (${facName})`;
+            }
+            return s;
+        });
+
+        const classrooms = [
+            "E 301", "E 302", "Workshop", "C109A", "C 309", "E 201", "E 303", "E 304", "B 202", "C109B", "BEE Lab",
+            "B 201", "CHEM Lab", "C 310", "EM Lab", "C 302", "PHY Lab", "C 303", "BXE Lab", "B 104", "B 101"
+        ];
+        
+        const timeSlots = [
+            "08:30 AM - 09:30 AM", "09:30 AM - 10:30 AM", "10:45 AM - 11:45 AM", "11:45 AM - 12:45 PM",
+            "01:30 PM - 02:30 PM", "02:30 PM - 03:30 PM"
         ];
 
-        let scheduleDataTomorrow = [
-             { id: 5, time: '10:00 AM - 11:00 AM', subject: 'Classical Mechanics - PH-302', classroom: 'C-105', contentAdded: false },
-             { id: 6, time: '01:00 PM - 02:00 PM', subject: 'Database Systems - CS-204', classroom: 'A-202 (Lab)', contentAdded: false },
+        let scheduleData = [
+            { id: 1, time: '09:30 AM - 10:30 AM', subject: 'Design Thinking (Ms. Shilpa Tambe)', classroom: 'B 201', contentAdded: true, type: 'Regular', assignedTo: null, isCancelled: false },
+            { id: 2, time: '10:45 AM - 11:45 AM', subject: 'Engg. Graphics (Ms. Shilpa Tambe)', classroom: 'B 202', contentAdded: false, type: 'Regular', assignedTo: 'Mr. Vishal Kulkarni', isCancelled: false },
+            { id: 3, time: '01:30 PM - 02:30 PM', subject: 'Design Thinking (Ms. Shilpa Tambe)', classroom: 'B 201', contentAdded: false, type: 'Regular', assignedTo: null, isCancelled: false },
         ];
-
-        let currentSchedule = scheduleDataToday;
+        let notifications = [];
         let currentlyEditingClassId = null;
 
         // --- DOM Elements ---
         const loginPage = document.getElementById('login-page');
         const appInterface = document.getElementById('app-interface');
-        const sidebar = document.getElementById('sidebar');
-        const sidebarOverlay = document.getElementById('sidebar-overlay');
-        const openSidebarBtn = document.getElementById('open-sidebar-btn');
-        const closeSidebarBtn = document.getElementById('close-sidebar-btn');
-        const contentModal = document.getElementById('content-modal');
-        const modalTitle = document.getElementById('modal-title');
         const scheduleContainer = document.getElementById('schedule-container');
+        const modalBackdrop = document.getElementById('modal-backdrop');
+        const modalContainer = document.getElementById('modal-container');
         const toast = document.getElementById('toast');
         const toastMessage = document.getElementById('toast-message');
+        const toastIcon = document.getElementById('toast-icon');
+        const notificationPanel = document.getElementById('notification-panel');
+        const notificationBellBtn = document.getElementById('notification-bell-btn');
+        const notificationDot = document.getElementById('notification-dot');
+        const notificationList = document.getElementById('notification-list');
 
-        // --- RENDER FUNCTION ---
-        function renderSchedule() {
-            scheduleContainer.innerHTML = ''; // Clear existing schedule
-            if (currentSchedule.length === 0) {
-                scheduleContainer.innerHTML = `<div class="bg-white p-6 rounded-lg shadow-md text-center text-gray-500">No classes scheduled for this day.</div>`;
+        // --- RENDER FUNCTIONS ---
+        const renderSchedule = () => {
+            scheduleContainer.innerHTML = '';
+            scheduleData.forEach(item => {
+                let statusBadge, cardStateClasses, buttonStateClasses, dropdownMenu;
+                
+                if (item.isCancelled) {
+                    statusBadge = `<div class="text-xs font-bold text-red-400 bg-red-900/50 px-2 py-1 rounded-full">Cancelled</div>`;
+                    cardStateClasses = 'opacity-50 pointer-events-none';
+                    buttonStateClasses = 'disabled:opacity-50 cursor-not-allowed';
+                    dropdownMenu = ''; // No dropdown for cancelled lectures
+                } else {
+                    statusBadge = item.contentAdded ? `<div class="text-xs font-bold text-emerald-400 bg-emerald-900/50 px-2 py-1 rounded-full">Content Added</div>` : `<div class="text-xs font-bold text-amber-400 bg-amber-900/50 px-2 py-1 rounded-full">Content Missing</div>`;
+                    cardStateClasses = 'card-hover-effect';
+                    buttonStateClasses = '';
+                    dropdownMenu = `
+                        <div class="relative dropdown">
+                            <button onclick="toggleDropdown(event)" class="text-slate-500 hover:text-slate-300 p-2 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-more-horizontal"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button>
+                            <div class="dropdown-menu w-48 bg-slate-700 rounded-lg shadow-xl border border-slate-600 p-2">
+                                <a href="#" onclick="openEditLectureModal(${item.id})" class="flex items-center w-full text-left px-3 py-2 text-sm text-slate-200 hover:bg-slate-600 rounded-md">Edit Lecture</a>
+                                <a href="#" onclick="assignSubstitute(${item.id})" class="flex items-center w-full text-left px-3 py-2 text-sm text-slate-200 hover:bg-slate-600 rounded-md">Assign Substitute</a>
+                                <div class="my-1 h-px bg-slate-600"></div>
+                                <a href="#" onclick="openCancelLectureModal(${item.id})" class="flex items-center w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-slate-600 rounded-md">Cancel Lecture</a>
+                            </div>
+                        </div>`;
+                }
+                
+                let assignedInfo = item.assignedTo ? `<div class="mt-2 text-xs text-blue-400 font-semibold bg-blue-900/50 p-2 rounded-lg">Substitute: ${item.assignedTo}</div>` : '';
+                
+                const cardHTML = `
+                <div class="bg-slate-800 p-5 rounded-2xl shadow-lg border border-slate-700 ${cardStateClasses}">
+                    <div class="flex justify-between items-start">
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full ${item.type === 'Extra' ? 'bg-purple-500' : 'bg-blue-500'}"></div>
+                            <span class="text-sm font-bold text-slate-300">${item.time}</span>
+                        </div>
+                        ${statusBadge}
+                    </div>
+                    <h3 class="text-xl font-extrabold text-slate-100 mt-3">${item.subject}</h3>
+                    <div class="flex items-center gap-2 text-slate-400 mt-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                        <span>${item.classroom}</span>
+                    </div>
+                    ${assignedInfo}
+                    <div class="border-t border-slate-700 my-4"></div>
+                    <div class="flex justify-between items-center">
+                        <button onclick="openManageContentModal(${item.id})" class="text-sm font-bold text-white py-2 px-4 rounded-lg animated-gradient hover:opacity-90 ${buttonStateClasses}" ${item.isCancelled ? 'disabled' : ''}>${item.contentAdded ? 'Manage' : 'Add'} Content</button>
+                        ${dropdownMenu}
+                    </div>
+                </div>`;
+                scheduleContainer.innerHTML += cardHTML;
+            });
+        };
+        
+        const renderNotifications = () => {
+            notificationList.innerHTML = '';
+            if (notifications.length === 0) {
+                notificationList.innerHTML = `<div class="text-center text-sm text-slate-500 p-4">No new notifications</div>`;
                 return;
             }
-            currentSchedule.forEach(item => {
-                const statusHtml = item.contentAdded
-                    ? `<div class="flex items-center justify-end mb-2"><span class="text-sm font-medium text-green-600">Content Added</span><svg class="ml-1 h-5 w-5 text-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg></div>`
-                    : `<div class="flex items-center justify-end mb-2"><span class="text-sm font-medium text-gray-500">Content Not Added</span></div>`;
-
-                const buttonHtml = item.contentAdded
-                    ? `<button onclick="openModal(${item.id})" class="text-sm font-medium py-2 px-4 rounded-md bg-indigo-100 text-indigo-700 hover:bg-indigo-200">Manage Content</button>`
-                    : `<button onclick="openModal(${item.id})" class="text-sm font-medium py-2 px-4 rounded-md bg-indigo-600 text-white hover:bg-indigo-700">Add Content</button>`;
-
-                const scheduleItem = `
-                    <div class="bg-white p-4 rounded-lg shadow-md flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                        <div class="mb-4 sm:mb-0">
-                            <p class="text-sm font-medium text-indigo-600">${item.time}</p>
-                            <h3 class="text-lg font-semibold text-gray-800">${item.subject}</h3>
-                            <p class="text-sm text-gray-500">Classroom: ${item.classroom}</p>
-                        </div>
-                        <div class="text-right flex-shrink-0">
-                            ${statusHtml}
-                            ${buttonHtml}
-                        </div>
-                    </div>`;
-                scheduleContainer.innerHTML += scheduleItem;
+            notifications.forEach(notif => {
+                const notifHTML = `
+                <div class="p-2 border-b border-slate-700 last:border-b-0">
+                    <p class="text-sm text-slate-300">${notif.message}</p>
+                    <p class="text-xs text-slate-500 mt-1">${new Date(notif.timestamp).toLocaleTimeString()}</p>
+                </div>`;
+                notificationList.innerHTML += notifHTML;
             });
-        }
-
+        };
+        
         // --- APP LOGIC ---
-        function handleLogin() {
+        const handleLogin = () => {
             document.getElementById('login-btn-text').classList.add('hidden');
             document.getElementById('login-spinner').classList.remove('hidden');
-
-            setTimeout(() => { // Simulate API call
-                loginPage.classList.add('hidden');
-                appInterface.classList.remove('hidden');
-                document.getElementById('login-btn-text').classList.remove('hidden');
-                document.getElementById('login-spinner').classList.add('hidden');
-                changeScheduleView('today');
-                showPage('dashboard-page');
-            }, 1500);
-        }
-
-        function handleLogout() {
-            appInterface.classList.add('hidden');
-            loginPage.classList.remove('hidden');
-            if (!sidebar.classList.contains('-translate-x-full')) {
-                toggleSidebar();
-            }
-        }
-
-        function openModal(classId) {
-            currentlyEditingClassId = classId;
-            const classData = [...scheduleDataToday, ...scheduleDataTomorrow].find(item => item.id === classId);
-            modalTitle.innerText = `Manage Content for ${classData.subject}`;
-            contentModal.classList.remove('hidden');
-        }
-
-        function closeModal() {
-            contentModal.classList.add('hidden');
-            document.getElementById('file-name-display').innerText = '';
-            document.getElementById('file-upload-input').value = '';
-            document.getElementById('drive-link').value = '';
-            switchTab('upload');
-        }
-
-        function handleSave() {
-            const classToUpdate = [...scheduleDataToday, ...scheduleDataTomorrow].find(item => item.id === currentlyEditingClassId);
-            if (classToUpdate) {
-                classToUpdate.contentAdded = true;
-            }
-            closeModal();
-            renderSchedule();
-            showToast('Content saved successfully!');
-        }
-        
-        function showPage(pageId) {
-            document.querySelectorAll('.app-page').forEach(page => page.classList.add('hidden'));
+            setTimeout(() => {
+                loginPage.style.display = 'none';
+                appInterface.style.display = 'block';
+                document.getElementById('greeting').innerText = `Good ${new Date().getHours() < 12 ? 'Morning' : (new Date().getHours() < 18 ? 'Afternoon' : 'Evening')}, Shilpa Mam!`;
+                renderSchedule();
+                renderNotifications();
+            }, 1000);
+        };
+        const handleLogout = () => {
+            appInterface.style.display = 'none';
+            loginPage.style.display = 'flex';
+            document.getElementById('login-btn-text').classList.remove('hidden');
+            document.getElementById('login-spinner').classList.add('hidden');
+        };
+        const closeAllModals = () => {
+            modalBackdrop.classList.add('hidden');
+            modalContainer.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        };
+        const showPage = (pageId) => {
+            document.querySelectorAll('.app-page').forEach(p => p.classList.add('hidden'));
             document.getElementById(pageId).classList.remove('hidden');
-            
-            document.querySelectorAll('.sidebar-link').forEach(link => link.classList.remove('active'));
-            document.querySelector(`.sidebar-link[onclick="showPage('${pageId}')"]`).classList.add('active');
-
-            if (window.innerWidth < 768 && !sidebar.classList.contains('-translate-x-full')) {
-                toggleSidebar();
-            }
-        }
-        
-        function showToast(message) {
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            document.querySelector(`.nav-link[onclick="showPage('${pageId}')"]`).classList.add('active');
+        };
+        const showToast = (message, type = 'info') => {
             toastMessage.innerText = message;
+            toast.className = 'fixed top-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg flex items-center'; // Reset classes
+            if (type === 'success') {
+                toast.classList.add('bg-emerald-500');
+                toastIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
+            } else { // info
+                toast.classList.add('bg-blue-500');
+                toastIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="16" y2="12"/><line x1="12" x2="12.01" y1="8" y2="8"/></svg>`;
+            }
             toast.classList.add('show');
-            setTimeout(() => { toast.classList.remove('show'); }, 3000);
-        }
-
-        // --- SIDEBAR LOGIC ---
-        // Naya aur behtar sidebar logic
-        function toggleSidebar() {
-            sidebar.classList.toggle('-translate-x-full');
-            sidebarOverlay.classList.toggle('hidden');
-        }
+            setTimeout(() => { toast.classList.remove('show'); }, 4000);
+        };
         
-        openSidebarBtn.addEventListener('click', toggleSidebar);
-        closeSidebarBtn.addEventListener('click', toggleSidebar);
-        sidebarOverlay.addEventListener('click', toggleSidebar);
+        // --- Modal Opening Functions ---
+        const createSelectOptions = (options, selectedValue = '') => options.map(opt => `<option value="${opt}" ${opt === selectedValue ? 'selected' : ''}>${opt}</option>`).join('');
 
-        // --- SCHEDULE VIEW LOGIC ---
-        function changeScheduleView(view) {
-            const todayBtn = document.getElementById('view-today-btn');
-            const tomorrowBtn = document.getElementById('view-tomorrow-btn');
-            const activeClasses = ['bg-indigo-600', 'text-white'];
-            const inactiveClasses = ['text-gray-600', 'hover:bg-gray-100'];
+        const openExtraLectureModal = () => {
+            const modalHTML = `
+            <div class="bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-md p-6">
+                <h3 class="text-xl font-bold text-slate-100 mb-4">Schedule an Extra Lecture</h3>
+                <form id="extra-lecture-form" class="space-y-4">
+                    <div><label class="text-sm font-medium text-slate-400">Subject Name</label><select required class="mt-1 w-full p-2 bg-slate-700 text-slate-200 border border-slate-600 rounded-md focus:ring-2 focus:ring-blue-500">${createSelectOptions(subjects)}</select></div>
+                    <div><label class="text-sm font-medium text-slate-400">Time Slot</label><select required class="mt-1 w-full p-2 bg-slate-700 text-slate-200 border border-slate-600 rounded-md focus:ring-2 focus:ring-blue-500">${createSelectOptions(timeSlots)}</select></div>
+                    <div><label class="text-sm font-medium text-slate-400">Classroom</label><select required class="mt-1 w-full p-2 bg-slate-700 text-slate-200 border border-slate-600 rounded-md focus:ring-2 focus:ring-blue-500">${createSelectOptions(classrooms)}</select></div>
+                    <div class="flex justify-end gap-3 pt-4"><button type="button" onclick="closeAllModals()" class="px-4 py-2 text-sm font-bold rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200">Cancel</button><button type="submit" class="px-4 py-2 text-sm font-bold text-white rounded-lg animated-gradient hover:opacity-90">Add Lecture</button></div>
+                </form>
+            </div>`;
+            modalContainer.innerHTML = modalHTML;
+            modalBackdrop.classList.remove('hidden');
+            modalContainer.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            document.getElementById('extra-lecture-form').addEventListener('submit', handleAddLecture);
+        };
+        const openManageContentModal = (id) => {
+            const item = scheduleData.find(i => i.id === id);
+            const modalHTML = `
+            <div class="bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-md p-6">
+                <h3 class="text-xl font-bold text-slate-100 mb-2">Manage Content</h3>
+                <p class="text-sm text-slate-400 mb-4">For: ${item.subject}</p>
+                <div class="border-b border-slate-600"><nav class="-mb-px flex space-x-6"><button id="tab-link" onclick="switchContentTab('link')" class="content-tab whitespace-nowrap py-3 px-1 text-slate-400 font-medium text-sm active">Add Drive Link</button><button id="tab-upload" onclick="switchContentTab('upload')" class="content-tab whitespace-nowrap py-3 px-1 text-slate-400 font-medium text-sm">Upload File</button></nav></div>
+                
+                <div id="content-link" class="mt-6"><label class="block text-sm font-medium text-slate-400">Google Drive Sharable Link</label><input type="url" class="mt-1 w-full p-2 bg-slate-700 text-slate-200 border border-slate-600 rounded-md focus:ring-2 focus:ring-blue-500" placeholder="https://docs.google.com/..."></div>
+                
+                <div id="content-upload" class="mt-6 hidden"><div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-600 border-dashed rounded-md"><div class="space-y-1 text-center"><svg class="mx-auto h-12 w-12 text-slate-500" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><div class="flex text-sm text-slate-400"><label for="file-upload" class="relative cursor-pointer bg-slate-800 rounded-md font-medium text-blue-400 hover:text-blue-300 focus-within:outline-none"><span>Upload a file</span><input id="file-upload" name="file-upload" type="file" class="sr-only"></label><p class="pl-1">or drag and drop</p></div><p class="text-xs text-slate-500">PPT, PDF up to 10MB</p></div></div></div>
 
-            if (view === 'today') {
-                currentSchedule = scheduleDataToday;
-                todayBtn.classList.add(...activeClasses);
-                todayBtn.classList.remove(...inactiveClasses);
-                tomorrowBtn.classList.add(...inactiveClasses);
-                tomorrowBtn.classList.remove(...activeClasses);
-            } else {
-                currentSchedule = scheduleDataTomorrow;
-                tomorrowBtn.classList.add(...activeClasses);
-                tomorrowBtn.classList.remove(...inactiveClasses);
-                todayBtn.classList.add(...inactiveClasses);
-                todayBtn.classList.remove(...activeClasses);
-            }
+                <div class="flex justify-end gap-3 pt-6"><button type="button" onclick="closeAllModals()" class="px-4 py-2 text-sm font-bold rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200">Cancel</button><button type="button" onclick="handleSaveContent(${id})" class="px-4 py-2 text-sm font-bold text-white rounded-lg animated-gradient hover:opacity-90">Save Content</button></div>
+            </div>`;
+            modalContainer.innerHTML = modalHTML;
+            modalBackdrop.classList.remove('hidden');
+            modalContainer.classList.remove('hidden');
+        };
+        const openEditLectureModal = (id) => {
+            currentlyEditingClassId = id;
+            const item = scheduleData.find(i => i.id === id);
+            const modalHTML = `
+            <div class="bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-md p-6">
+                <h3 class="text-xl font-bold text-slate-100 mb-4">Edit Lecture</h3>
+                <form id="edit-lecture-form" class="space-y-4">
+                    <div><label class="text-sm font-medium text-slate-400">Subject Name</label><select required class="mt-1 w-full p-2 bg-slate-700 text-slate-200 border border-slate-600 rounded-md">${createSelectOptions(subjects, item.subject)}</select></div>
+                    <div><label class="text-sm font-medium text-slate-400">Time Slot</label><select required class="mt-1 w-full p-2 bg-slate-700 text-slate-200 border border-slate-600 rounded-md">${createSelectOptions(timeSlots, item.time)}</select></div>
+                    <div><label class="text-sm font-medium text-slate-400">Classroom</label><select required class="mt-1 w-full p-2 bg-slate-700 text-slate-200 border border-slate-600 rounded-md">${createSelectOptions(classrooms, item.classroom)}</select></div>
+                    <div class="flex justify-end gap-3 pt-4"><button type="button" onclick="closeAllModals()" class="px-4 py-2 text-sm font-bold rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200">Cancel</button><button type="submit" class="px-4 py-2 text-sm font-bold text-white rounded-lg animated-gradient hover:opacity-90">Update Lecture</button></div>
+                </form>
+            </div>`;
+            modalContainer.innerHTML = modalHTML;
+            modalBackdrop.classList.remove('hidden');
+            modalContainer.classList.remove('hidden');
+            document.getElementById('edit-lecture-form').addEventListener('submit', handleUpdateLecture);
+        };
+        const openCancelLectureModal = (id) => {
+             const item = scheduleData.find(i => i.id === id);
+             const modalHTML = `
+             <div class="bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-md p-6">
+                <div class="text-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alert-triangle mx-auto text-red-400"><path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
+                    <h3 class="text-xl font-bold text-slate-100 mt-4">Confirm Cancellation</h3>
+                    <p class="text-sm text-slate-400 mt-2">Are you sure you want to cancel the<br><strong>${item.subject}</strong> lecture?</p>
+                </div>
+                <div class="flex justify-center gap-4 pt-6">
+                    <button type="button" onclick="closeAllModals()" class="px-6 py-2 text-sm font-bold rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200">Go Back</button>
+                    <button type="button" onclick="handleCancelLecture(${id})" class="px-6 py-2 text-sm font-bold text-white rounded-lg bg-red-600 hover:bg-red-700">Yes, Cancel</button>
+                </div>
+             </div>`;
+            modalContainer.innerHTML = modalHTML;
+            modalBackdrop.classList.remove('hidden');
+            modalContainer.classList.remove('hidden');
+        };
+
+        // --- Data Handling Functions ---
+        const handleAddLecture = (e) => {
+            e.preventDefault();
+            const newLecture = { id: Date.now(), subject: e.target.elements[0].value, time: e.target.elements[1].value, classroom: e.target.elements[2].value, contentAdded: false, type: 'Extra', assignedTo: null, isCancelled: false };
+            scheduleData.push(newLecture);
             renderSchedule();
-        }
-
-        // --- MODAL TABS LOGIC ---
-        function switchTab(tab) {
-            const tabUploadBtn = document.getElementById('tab-upload');
-            const tabLinkBtn = document.getElementById('tab-link');
-            const activeClasses = ['text-indigo-600', 'border-indigo-500'];
-            const inactiveClasses = ['text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300', 'border-transparent'];
+            closeAllModals();
+        };
+        const handleUpdateLecture = (e) => {
+            e.preventDefault();
+            const item = scheduleData.find(i => i.id === currentlyEditingClassId);
+            item.subject = e.target.elements[0].value;
+            item.time = e.target.elements[1].value;
+            item.classroom = e.target.elements[2].value;
+            renderSchedule();
+            closeAllModals();
+        };
+        const handleSaveContent = (id) => {
+            scheduleData.find(i => i.id === id).contentAdded = true;
+            renderSchedule();
+            closeAllModals();
+            showToast('Content saved successfully!', 'success');
+        };
+        const handleCancelLecture = (id) => {
+            const item = scheduleData.find(i => i.id === id);
+            item.isCancelled = true;
             
-            if (tab === 'upload') {
-                document.getElementById('content-upload').classList.remove('hidden');
-                document.getElementById('content-link').classList.add('hidden');
-                tabUploadBtn.classList.add(...activeClasses);
-                tabUploadBtn.classList.remove(...inactiveClasses);
-                tabLinkBtn.classList.add(...inactiveClasses);
-                tabLinkBtn.classList.remove(...activeClasses);
-            } else {
-                document.getElementById('content-upload').classList.add('hidden');
-                document.getElementById('content-link').classList.remove('hidden');
-                tabLinkBtn.classList.add(...activeClasses);
-                tabLinkBtn.classList.remove(...inactiveClasses);
-                tabUploadBtn.classList.add(...inactiveClasses);
-                tabUploadBtn.classList.remove(...activeClasses);
+            // Add notification
+            notifications.unshift({
+                id: Date.now(),
+                message: `Free slot available: ${item.subject} (${item.time})`,
+                timestamp: Date.now()
+            });
+            
+            renderSchedule();
+            renderNotifications();
+            notificationDot.classList.remove('hidden');
+            closeAllModals();
+            showToast('Lecture cancelled. Notification sent.', 'info');
+        };
+        const assignSubstitute = (id) => {
+            const item = scheduleData.find(i => i.id === id);
+            const substituteTeacher = prompt("Please enter the name of the substitute teacher:", "Dr. Rahul Verma");
+            if (substituteTeacher) {
+                item.assignedTo = substituteTeacher;
+                renderSchedule();
             }
-        }
+        };
         
-        function updateFileName() {
-            const fileInput = document.getElementById('file-upload-input');
-            if(fileInput.files.length > 0) {
-                document.getElementById('file-name-display').innerText = `Selected file: ${fileInput.files[0].name}`;
+        // --- UI Helpers ---
+        const toggleDropdown = (event) => {
+            event.stopPropagation();
+            document.querySelectorAll('.dropdown.open').forEach(d => d !== event.currentTarget.closest('.dropdown') && d.classList.remove('open'));
+            event.currentTarget.closest('.dropdown').classList.toggle('open');
+        };
+        
+        notificationBellBtn.addEventListener('click', (event) => {
+            event.stopPropagation();
+            notificationPanel.style.display = notificationPanel.style.display === 'block' ? 'none' : 'block';
+            notificationDot.classList.add('hidden'); // Mark as read when opened
+        });
+        
+        window.addEventListener('click', (e) => {
+            // Close dropdowns
+            document.querySelectorAll('.dropdown.open').forEach(d => d.classList.remove('open'));
+            // Close notification panel
+            if (notificationPanel && !notificationPanel.contains(e.target) && !notificationBellBtn.contains(e.target)) {
+                notificationPanel.style.display = 'none';
             }
-        }
-        
-        // Initial setup for modal tabs
-        switchTab('upload');
+        });
 
+        const switchContentTab = (tab) => {
+            document.querySelectorAll('.content-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(`tab-${tab}`).classList.add('active');
+            if (tab === 'link') {
+                document.getElementById('content-link').classList.remove('hidden');
+                document.getElementById('content-upload').classList.add('hidden');
+            } else {
+                document.getElementById('content-link').classList.add('hidden');
+                document.getElementById('content-upload').classList.remove('hidden');
+            }
+        };
+        
+        modalBackdrop.addEventListener('click', closeAllModals);
     </script>
 </body>
 </html>
+
 
